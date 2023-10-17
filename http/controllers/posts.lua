@@ -7,24 +7,21 @@ local Base = require("base_class.base_route")
 
 
 
+-- local Sample = setmetatable({}, Base)
 local Sample = Base:new()
 
-function Sample:handlePostUser()
-    print(self.name)
-    -- for i,x in pairs(self.data) do
-    --     print(i,x)
-    -- end
-    
 
-    print("printas is post")
-    -- You can use self.name here
-    -- local user = User({
-    --     username = data.username,
-    --     password = data.password,
-    --     time_create = os.time()
-    -- })
-    -- user:save()
-    response.send_response(200, "success")
+
+function Sample:handlePostUser()
+  
+    for i,x in pairs(Sample.data) do
+    print(i,x)
+    end
+    -- print("ssssss", Sample.data)
+    -- for i, x in pairs(Sample.data) do
+    -- print(i,x)
+    -- end 
+
 end
 
 function Sample:getSomg()
@@ -34,11 +31,7 @@ end
 function Sample:deleteHandler(id)
     print("print is delete")
     print(id)
-    -- print(self.params)
 
---         local useris = User.get:where({id=id}):first()
-
---         useris:delete()
     response.send_response(204, "Delted")
 
 end
