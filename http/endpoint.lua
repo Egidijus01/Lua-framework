@@ -2,8 +2,8 @@ package.path = package.path .. ";/www/cgi-bin/?.lua;/www/?.lua"
 
 local endpoint = {}
 
-local response = require("response")
-local codes = require("http_codes")
+local response = require("utils.responses.response")
+local codes = require("utils.http_codes")
 local router = require("framew.router")
 local models = require("http.models.posts_models")
 local posts = require("http.controllers.posts")
@@ -18,18 +18,19 @@ DB = {
 }
 
 local User = models.User
-
-
--- rr:post("/api/create", posts.handlePostUser)
--- rr:get("/api/get", posts.getSomg)
--- rr:delete("/api/delete/:id", posts.deleteHandler)
 local rr = require("http.routes.routes")
+
+-- rr:post("/api/create/:id", posts.handlePostUser)
+-- rr:get("/api/get/:id", posts.getSomg)
+-- rr:delete("/api/delete/:id", posts.deleteTest)
+-- rr:put("/api/put", posts.putTest)
+
+-- local rr = require("http.routes.routes")
 
 function endpoint:handle_request()
 
 
     rr:route()
 
-    response.send_response(404, "Route not found")
 end
 return endpoint

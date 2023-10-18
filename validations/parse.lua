@@ -1,5 +1,6 @@
 local M = {}
-
+local cjson = require("cjson")
+local err = require("utils.responses.error_response")
 function M.parse_form_data(data)
     local parsed_data = {}
     if data:sub(-1) ~= "\r\n" then data = data .. "\r\n" end
@@ -22,7 +23,7 @@ function M.parse_json(data)
   
     local success, json_data = pcall(cjson.decode, data)
         if not success then
-            return "Invalid JSON data"
+            err.requestError("Invalid json data")
         end
         return json_data
 

@@ -26,7 +26,7 @@ POSTGRESQL = "postgresql"
 ------------------------------------------------------------------------------
 
 if not DB then
-    print("[SQL:Startup] Can't find global database settings variable 'DB'. Creating empty one.")
+    -- print("[SQL:Startup] Can't find global database settings variable 'DB'. Creating empty one.")
     DB = {}
 end
 
