@@ -15,40 +15,42 @@ local Sample = Base:new()
 
 
 
-function Sample:handlePostUser(id)
+function Sample:handlePostUser(request, id)
+    -- print(request.headers['content-type'])
     print("printas is post")
-    -- print("ID from handler", id)
-    -- for i,x in pairs(Sample.data) do
-    -- print(i,x)
-    -- end
-    -- print("ssssss", Sample.data)
-    -- for i, x in pairs(Sample.data) do
-    -- print(i,x)
-    -- end 
+    
+
+    print(id)
+
     response.send_response(codes.CREATED, "Created succesfully")
 
 end
 
-function Sample:getSomg()
+function Sample:getSomg(request)
     print("printas is get")
+    -- print(request:option("username"))
+    for i,x in pairs(request) do
+    print(i,x)
+    end
     response.send_response(codes.OK, "OK")
 end
 
-function Sample:deleteTest(id)
+function Sample:deleteTest(request, id)
     print("ID from handler:", id) 
     print("printas is delete")
     response.send_response(codes.OK, "Deleted succesfully")
 end
 
-function Sample:putTest()
+function Sample:putTest(request)
     local email = "antanas@mail"
+
     print(validators.validate_email(email))
     print("printas is put")
   
     response.send_response(codes.OK, "Updated succesfully")
 end
 
-function Sample:Login()
+function Sample:Login(request)
     local data = Sample.data
     local res = auth:Login(data.username, data.password)    
     if res then

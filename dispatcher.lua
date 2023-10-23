@@ -38,7 +38,6 @@ function handle_request(env)
 
     endpoint.params = params(env)
     B.params = params(env)
-    
 
 
     local is_valid, validation_message, content = validate.validate_request(env, request_body)
@@ -47,6 +46,7 @@ function handle_request(env)
 
     if is_valid and d then
         B.data = content
+        env.data = content
 
         endpoint.env = env
         router.env = env

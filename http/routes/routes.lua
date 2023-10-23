@@ -7,9 +7,9 @@ local CH = check:new()
 
 
 local rr = router:new()
-rr:post("/api/create/:id", posts.handlePostUser)
-rr:get("/api/get", posts.getSomg, {"auth"})
-rr:delete("/api/delete/:id", posts.deleteTest, {"auth"})
+rr:post("/api/create/{id?}", posts.handlePostUser)
+rr:get("/api/get", posts.getSomg)
+rr:delete("/api/delete/{id?}", posts.deleteTest, {"auth"})
 rr:put("/api/put", posts.putTest)
 rr:post("/api/login", posts.Login)
 
