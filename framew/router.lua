@@ -1,6 +1,6 @@
 local Router = {}
 local errors = require("utils.responses.error_response")
-
+-- local auth = require("middleware.auth")
 
 function Router:new()
     local obj = {}
@@ -13,25 +13,65 @@ end
 
 function Router:route()
     local request_path = self.env.REQUEST_URI
+    local request_method = self.env.REQUEST_METHOD
+
 
 
     for _, route in pairs(self.routes) do
- 
-        local route_pattern = route.path:gsub("/:id", "/(%%d+)") 
+        -- print(route.options)
+        -- for i,x in pairs(route.options) do
+        -- print(i,x)
+        -- end
+        local route_pattern = route.path:gsub("/:id", "/(%%d+)")
+        print(route_pattern)
         local captures = {request_path:match(route_pattern)}
         local path_without_id = route.path:match("(.-)/:id$")
-
+        local options = route.options
         if path_without_id then
         local path_without_last_part = request_path:gsub('/[^/]+$', '')
 
-            if captures and path_without_id == path_without_last_part then
-                local id = captures[1]
-                print("ID from router:", id)
-                print("Handler:", route.handler)
-                return route:handler(id)
+            if captures and path_without_id == path_without_last_part and route.method == request_method  then
+                if options then
+                    for _, option in pairs(options) do
+                        local mod = require("middleware." .. option)
+    
+                        local res = mod.init(self.env)
+                        print(res)
+                        if res then
+                            local id = captures[1]
+                            return route:handler(id)                
+                        end
+                        
+                    end
+                else 
+                    local id = captures[1]
+
+
+                    return route:handler(id)
+                end
+
+
+
+                
             end
-        elseif route.path == request_path then
-            return route.handler()
+        elseif route.path == request_path and route.method == request_method then
+
+
+            if options then
+                for _, option in pairs(options) do
+                    local mod = require("middleware." .. option)
+
+                    local res = mod.init(self.env)
+                    print(res)
+                    if res then
+                        return route.handler()                 
+                    end
+                    
+                end
+            else 
+                return route.handler()
+            end
+
         end
         
     end
@@ -41,23 +81,21 @@ end
 
 
 
-function Router:post(path, handler)
-    table.insert(self.routes, { path = path, method = "POST", handler = handler })
+function Router:post(path, handler, options)
+    table.insert(self.routes, { path = path, method = "POST", handler = handler, options = options })
 end
 
-function Router:get(path, handler)
-    table.insert(self.routes, { path = path, method = "GET", handler = handler })
+function Router:get(path, handler, options)
+    table.insert(self.routes, { path = path, method = "GET", handler = handler, options = options })
 end
 
-function Router:delete(path, handler)
-    table.insert(self.routes, { path = path, method = "DELETE", handler = handler })
+function Router:delete(path, handler, options)
+    table.insert(self.routes, { path = path, method = "DELETE", handler = handler, options = options })
 end
 
-function Router:put(path, handler)
-    table.insert(self.routes, { path = path, method = "PUT", handler = handler })
+function Router:put(path, handler, options)
+    table.insert(self.routes, { path = path, method = "PUT", handler = handler, options = options })
 end
-
-
 -- Other functions (e.g., trim_slash) can be defined here
 
 return Router

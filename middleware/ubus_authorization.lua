@@ -1,32 +1,31 @@
 
-local headers = require("validations.headers.required_headers")
+-- local headers = require("validations.headers.required_headers")
 local ubus = require "ubus"
--- Establish connection
+local cl = require("middleware.claims")
 local conn = ubus.connect()
 if not conn then
     error("Failed to connect to ubusd")
 end
 
-print(#conn:objects())
 
-local status = conn:call("session", "login", { username = "admin", password = "admin01" })
-
+Claims = cl:new()
 
 
-
-
-
-for i,x in pairs(status.data) do
-print(i,x)
-end
-
-print(status)
-
-
-
-table.insert(headers.required_headers, "Authorization")
 
 local Ubus_auth = {}
+
+local function getToken(username, password)
+    local res = conn:call("session", "login", { username = username, password = password })
+
+    if res then
+
+        local token = res.ubus_rpc_session
+        -- local list = conn:call("session", "list", {ubus_rpc_session=token})
+        return token
+    else
+        return nil
+    end
+end
 
 
 function Ubus_auth:new()
@@ -37,8 +36,8 @@ function Ubus_auth:new()
     return obj
 end
 
-function Ubus ()
-    
+function Ubus_auth:Login (username, password)
+    return getToken(username, password)
 end
 
 

@@ -5,8 +5,6 @@ local valid_method = require("validations.validate_method")
 local B = require("base_class.base_route")
 local err = require("utils.responses.error_response")
 
-
-
 local function params (env)
     local queryString = env.QUERY_STRING or ""
     local parameters = {}
@@ -17,12 +15,11 @@ local function params (env)
 end
 
 
-
 local router = require("framew.router")
 
 -- Main body required by uhhtpd-lua plugin
 function handle_request(env)
-    
+
     -- Injected uhttpd method
     local endpoint_module = require("http.endpoint")
 
@@ -36,26 +33,17 @@ function handle_request(env)
 
     local request_body = io.stdin:read("*all")
 
+    
 
 
     endpoint.params = params(env)
     B.params = params(env)
     
- 
+
 
     local is_valid, validation_message, content = validate.validate_request(env, request_body)
 
-
     local d = valid_method.validateRequestMethod(env.REQUEST_METHOD)
-
-
-
-    for i,x in pairs(env.headers) do
-    
-        print(i,x)
-    end
-    env.headers["Authorization"] = "ssss"
-    
 
     if is_valid and d then
         B.data = content
