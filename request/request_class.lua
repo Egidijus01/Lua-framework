@@ -18,8 +18,12 @@ function M:hea()
 end
 
 function M:query_table()
-
-    return self.query or {}
+    local result = {}
+    for key, value in self.query:gmatch("([^&]+)=([^&]+)") do
+        result[key] = value
+    end
+    return result
+    
 end
 
 function M:option(name)

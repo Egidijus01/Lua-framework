@@ -30,6 +30,9 @@ function Router:route()
         local path_without_id = route.path:match("(.-)/{(%w+[%??])}$")
         local is_required = not route.path:match("{(%w+%?)")
         local options = route.options
+        if route.path:sub(-1) == '/' then
+            route.path = route.path:sub(1, -2)
+        end
 
         if path_without_id then
 
@@ -44,12 +47,12 @@ function Router:route()
 
                             if res then
                                 local id = captures[1]
-                                return route:handler(self.env,id)
+                                return route:handler(request,id)
                             end
                         end
                     else
                         local id = captures[1]
-                        return route:handler(self.env, id)
+                        return route:handler(request, id)
                     end
                 end
             elseif is_required == false then
@@ -61,19 +64,29 @@ function Router:route()
 
                             if res then
                                 local id = nil
-                                return route:handler(request, id)
+                                if type(route.handler) == "function" then                                    
+                                    return route:handler(request, id)
+                                else
+                                    return errors.existError("Handler not found")
+                                end
+                            else 
+                                return errors.authError("Invalid Authorization header")   
                             end
                         end
                     else
                         local id = captures[1]
-                        return route:handler(request, id)
+                        if type(route.handler) == "function" then                                    
+                            return route:handler(request, id)
+                        else
+                            return errors.existError("Handler not found")
+                        end
                     end
                 end
             end
         
         elseif route.path == request_path and route.method == request_method then
 
-
+            
             if options then
                 for _, option in pairs(options) do
                     local mod = require("middleware." .. option)
@@ -81,37 +94,92 @@ function Router:route()
                     local res = mod.init(self.env)
                     print(res)
                     if res then
-                        return route:handler(request)                 
+                        if type(route.handler) == "function" then                                    
+                            return route:handler(request)
+                        else
+                            return errors.existError("Handler not found")
+                        end
+                    else 
+                        return errors.authError("Invalid Authorization header")               
                     end
-                    
+                   
                 end
             else 
-                return route:handler(request)
+                if type(route.handler) == "function" then                                    
+                    return route:handler(request)
+                else
+                    return errors.existError("Handler not found")
+                end
             end
-
-        end
         
+        
+        end
+    
     end
-
     return errors.existError("ROUTE DOESNT EXIST")
+
+
 end
 
 
 
 function Router:post(path, handler, options)
-    table.insert(self.routes, { path = path, method = "POST", handler = handler, options = options })
+    if type(handler) == "table" then
+        local mod = require(handler)
+        local hand = mod.create
+
+        if hand then
+            table.insert(self.routes, { path = path, method = "POST", handler = hand, options = options })        
+        else
+            return errors.existError("Method repair doesnt exist")            
+        end    
+    else
+        table.insert(self.routes, { path = path, method = "POST", handler = handler, options = options })
+
+    end
 end
 
 function Router:get(path, handler, options)
-    table.insert(self.routes, { path = path, method = "GET", handler = handler, options = options })
+    if type(handler) == "table" then
+        local mod = require(handler)
+        local hand = mod.index
+        print(hand)
+        if hand then
+            table.insert(self.routes, { path = path, method = "POST", handler = hand, options = options })        
+        else
+            return errors.existError("Method repair doesnt exist")            
+        end     
+    else
+        table.insert(self.routes, { path = path, method = "GET", handler = handler, options = options })
+    end
 end
 
 function Router:delete(path, handler, options)
-    table.insert(self.routes, { path = path, method = "DELETE", handler = handler, options = options })
+    if type(handler) == "table" then
+        local mod = require(handler)
+        local hand = mod.destroy
+        if hand then
+            table.insert(self.routes, { path = path, method = "POST", handler = hand, options = options })        
+        else
+            return errors.existError("Method repair doesnt exist")            
+        end     
+    else
+        table.insert(self.routes, { path = path, method = "DELETE", handler = handler, options = options })
+    end
 end
 
 function Router:put(path, handler, options)
-    table.insert(self.routes, { path = path, method = "PUT", handler = handler, options = options })
+    if type(handler) == "table" then
+        local mod = require(handler)
+        local hand = mod.repair
+        if hand then
+            table.insert(self.routes, { path = path, method = "POST", handler = hand, options = options })        
+        else
+            return errors.existError("Method repair doesnt exist")            
+        end
+    else
+        table.insert(self.routes, { path = path, method = "PUT", handler = handler, options = options })
+    end
 end
 -- Other functions (e.g., trim_slash) can be defined here
 

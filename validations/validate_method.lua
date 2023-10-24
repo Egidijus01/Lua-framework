@@ -17,7 +17,7 @@ function sample.validateRequestMethod(requestMethod)
     end
 
     
-    return false, err.requestError("BAD METHOD")
+    return false
 end
 
 

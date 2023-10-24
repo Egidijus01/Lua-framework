@@ -23,13 +23,13 @@ function M.init(request)
     local token = request.headers['authorization']
 
     if token == nil then
-        return err.authError("Missing Authorization header")
+        return false
     end 
 
     if checkIfTokenIsValid(token) then
         return true
     else
-        return err.authError("Invalid token")
+        return false
     end
 end
 

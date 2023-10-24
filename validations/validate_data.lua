@@ -13,6 +13,7 @@ local validation_rules = {
 
 -- Function to validate the request
 function sample.validate_request(env, data)
+    
     local response = {}
     -- Check required headers
     for _, header in ipairs(validation_rules.required_headers) do
@@ -30,16 +31,35 @@ function sample.validate_request(env, data)
 
     if content_type == "application/json" then
         -- response = parse.parse_json(data)
-        response =  cjson.decode(data)
-        
+        local status, content = pcall(cjson.decode, data)
+      
+        response = content
+        if status then
+            response = content
+        else
+            return false
+        end
+
     elseif string.match(content_type, "multipart/form%-data") then
-
-        response = parse.parse_form_data(data)
-
+        -- response = parse.parse_form_data(data)
+        local status, content = pcall(parse.parse_form_data, data)
+        if status then
+            response = content
+        else
+            return false
+        end
 
     elseif content_type == "application/x-www-form-urlencoded" then
-        response = parse.parse_urlencoded(data)
-        
+        -- response = parse.parse_urlencoded(data)
+        local status, content = pcall(parse.parse_urlencoded, data)
+        if status then
+            response = content
+        else
+            return false
+        end
+    
+    else
+        return false
     end
 
 

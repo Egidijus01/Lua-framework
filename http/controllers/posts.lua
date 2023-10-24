@@ -1,63 +1,77 @@
-local response = require("utils.responses.response")
-local codes = require("utils.http_codes")
-local models = require("http.models.posts_models")
-local User = models.User
-local Base = require("base_class.base_route")
-local validators = require("utils.validations.validate_fields")
-local UbusAuth = require("middleware.ubus_authorization")
-local base64 = require'base64'
 
+-- local codes = require("utils.http_codes")
+-- local models = require("http.models.posts_models")
+-- local User = models.User
+-- local validators = require("utils.validations.validate_fields")
+local UbusAuth = require("middleware.ubus_authorization")
 
 local auth = UbusAuth:new()
 
--- local Sample = setmetatable({}, Base)
-local Sample = Base:new()
+local Base = require("base_class.base_route")
+local res = require("utils.responses.response")
+
+local b = Base:new()
+local Sample = {}
+function Sample:new()
+    local obj = Base:new()
+    setmetatable(obj, self)
+    setmetatable(Sample, {__index = Base})
+    self.__index = self
+    return obj
+end 
 
 
+function Sample.index(request)
+    print("print is index")
+    
+    return b.response()
+end
+function Sample:getSomg(request)
+    print("Printas is get")
+    return b.response:with_status(205):response()
+
+
+end
 
 function Sample:handlePostUser(request, id)
     -- print(request.headers['content-type'])
-    print("printas is post")
-    
 
-    print(id)
+    -- return self.response.with_status(201)
+    return b.response:with_status(205):response()
+end
 
-    response.send_response(codes.CREATED, "Created succesfully")
+function Sample:create()
+    return b.response:with_status(205):response()
 
 end
 
-function Sample:getSomg(request)
-    print("printas is get")
-    -- print(request:option("username"))
-    for i,x in pairs(request) do
-    print(i,x)
-    end
-    response.send_response(codes.OK, "OK")
-end
 
 function Sample:deleteTest(request, id)
     print("ID from handler:", id) 
     print("printas is delete")
-    response.send_response(codes.OK, "Deleted succesfully")
+    return b.response:with_status(205):response()
+
 end
 
 function Sample:putTest(request)
     local email = "antanas@mail"
 
-    print(validators.validate_email(email))
+    -- print(validators.validate_email(email))
     print("printas is put")
   
-    response.send_response(codes.OK, "Updated succesfully")
+    return b.response:with_status(205):response()
+
 end
 
 function Sample:Login(request)
-    local data = Sample.data
+    local data = b.data
+
     local res = auth:Login(data.username, data.password)    
     if res then
-        response.send_response(codes.OK, res)
+        return b.response:with_message(res)
     else
-        response.send_response(codes.NOT_FOUND, "Wrong credentials")
+        return b.response:with_status(404):with_message("Not found"):response()
     end
-
+    -- return b.response:response()
 end
 return Sample

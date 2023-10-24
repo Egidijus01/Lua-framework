@@ -32,6 +32,10 @@ function handle_request(env)
     local endpoint = require("http.endpoint")
 
     local request_body = io.stdin:read("*all")
+    if request_body == "" then
+        request_body = "{}"
+    end 
+    
 
     
 
@@ -45,6 +49,7 @@ function handle_request(env)
     local d = valid_method.validateRequestMethod(env.REQUEST_METHOD)
 
     if is_valid and d then
+
         B.data = content
         env.data = content
 
@@ -55,7 +60,7 @@ function handle_request(env)
         
     else
 
-        err(validation_message)
+        err.requestError(validation_message)
     end
 
 
