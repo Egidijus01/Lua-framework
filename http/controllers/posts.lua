@@ -26,7 +26,8 @@ function Sample.index(request)
     
     return b.response()
 end
-function Sample:getSomg(request)
+function Sample:getSomg(request, id)
+    print(id)
     print("Printas is get")
     return b.response:with_status(205):response()
 
