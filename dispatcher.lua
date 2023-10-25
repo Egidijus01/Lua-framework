@@ -1,4 +1,4 @@
-package.path = package.path .. ";/www/cgi-bin/?.lua;/www/?.lua"
+package.path = package.path .. ";/www/cgi-bin/?.lua;/www/?.lua;/www/cgi-bin/http/controllers/?.lua;"
 local cjson = require("cjson")
 local validate = require("validations.validate_data")
 local valid_method = require("validations.validate_method")
@@ -14,7 +14,7 @@ local function params (env)
     return parameters
 end
 
-
+print("1")
 local router = require("framew.router")
 
 -- Main body required by uhhtpd-lua plugin
@@ -37,9 +37,9 @@ function handle_request(env)
     end 
     
 
+
     
-
-
+ 
     endpoint.params = params(env)
     B.params = params(env)
 
@@ -57,12 +57,10 @@ function handle_request(env)
         router.env = env
         endpoint.request_body = request_body
         endpoint:handle_request()
-        
     else
 
         err.requestError(validation_message)
     end
-
 
 end
 
