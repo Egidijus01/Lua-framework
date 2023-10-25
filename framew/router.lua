@@ -28,7 +28,7 @@ function Router:route()
 
 
     for _, route in pairs(self.routes) do
-
+        print(route.path, route.handler)
         local route_pattern = route.path:gsub("{(%w+)}", "([%%d]*)"):gsub("{(%w+%?)}", "([%%d]*)")
         local captures = {request_path:match(route_pattern)}
         local path_without_id = route.path:match("(.-)/{(%w+%??)}$")
@@ -131,7 +131,7 @@ end
 
 
 
-local function get_func(handler)
+local function get_func(handler, default)
     local pattern = "(.-)%.(.*)"
     local file_name, func_name = string.match(handler, pattern)
     local prefix = "/www/cgi-bin/http/controllers/"
@@ -141,8 +141,19 @@ local function get_func(handler)
         return nil
     else
         local tabl = f()
-
-        return tabl[func_name]
+        if func_name then
+            if tabl[func_name] then
+                return tabl[func_name]
+            else
+                return nil
+            end
+        else
+            if tabl[default] then
+                return tabl[func_name]
+            else
+                return nil
+            end
+        end
     end
     
 
@@ -150,27 +161,43 @@ end
 
 
 function Router:post(path, handler, options)
-    local func = get_func(handler)
-    table.insert(self.routes, { path = path, method = "POST", handler = func, options = options })
+    local func = get_func(handler, "create")
+    if func then
+        table.insert(self.routes, { path = path, method = "POST", handler = func, options = options })
+    else
+        return errors.existError(handler .. " Doesnt exist")
+    end
     
 end
 
 function Router:get(path, handler, options)
-
-    local func = get_func(handler)
-    table.insert(self.routes, { path = path, method = "GET", handler = func, options = options })
+    local func = get_func(handler, "index")
+    print(func)
+    if func then
+        table.insert(self.routes, { path = path, method = "GET", handler = func, options = options })        
+    -- else
+    --     return errors.existError(handler .. " Doesnt exist")
+    end 
     
 end
 
 function Router:delete(path, handler, options)
-    local func = get_func(handler)
-    table.insert(self.routes, { path = path, method = "DELETE", handler = func, options = options })
+    local func = get_func(handler, "destroy")
+    if func then
+        table.insert(self.routes, { path = path, method = "DELETE", handler = func, options = options })
+    else
+        return errors.existError(handler .. " Doesnt exist")
+    end
     
 end
 
 function Router:put(path, handler, options)
-    local func = get_func(handler)
-    table.insert(self.routes, { path = path, method = "PUT", handler = func, options = options })
+    local func = get_func(handler, "repair")
+    if func then
+        table.insert(self.routes, { path = path, method = "PUT", handler = func, options = options })
+    else
+        return errors.existError(handler .. " Doesnt exist")
+    end
     
 end
 -- Other functions (e.g., trim_slash) can be defined here
