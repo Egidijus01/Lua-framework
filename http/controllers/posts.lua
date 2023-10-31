@@ -1,9 +1,8 @@
 local UbusAuth = require("middleware.ubus_authorization")
-
 local auth = UbusAuth:new()
-
 local Base = require("base_class.base_route")
-local res = require("utils.responses.response")
+local models = require("http.models.posts_models")
+local User = models.User
 
 local b = Base:new()
 local Sample = {}
@@ -17,12 +16,26 @@ end
 
 
 function Sample.index(request, response)
+
     print("print is index")
     
     return response()
 end
 function Sample:getSomg(request, response)
-    print("print is get")
+    local user1 = User({
+        username = "Antanas",
+        password = "Antanas123",
+        age = "64",
+        job = "Vairavimo instruktorius",
+    
+    })
+    user1:save()
+    print("User created")
+
+    -- config:getTypedSections():where('address', NOT_EQUAL, '192.168.1.1')
+    -- config:getNamedSection()
+    -- config:getSections()
+    
 
     return response:with_status(205):response()
 
