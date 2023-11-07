@@ -1,9 +1,15 @@
 ------------------------------------------------------------------------------
 --                          query.lua                                       --
 ------------------------------------------------------------------------------
-
-local uci = require("uci")
+local err = require("utils.responses.error_response")
+require("uci")
 local x = uci.cursor()
+local cjson = require("cjson")
+
+
+
+
+
 
 
 function Query(own_table, data)
@@ -17,7 +23,7 @@ function Query(own_table, data)
 
 
         _data = {},
-        _get_col = function (self, colname)
+        _get_opt = function (self, colname)
             
             if self._data[colname] and self._data[colname].new then
                 return self._data[colname].new
@@ -32,7 +38,7 @@ function Query(own_table, data)
         -- @colname {string} column name in table
         -- @colvalue {string|number|boolean} new column value
         -----------------------------------------
-        _set_col = function (self, colname, colvalue)
+        _set_opt = function (self, colname, colvalue)
             
             local coltype
 
@@ -43,40 +49,36 @@ function Query(own_table, data)
                     self._data[colname].old = self._data[colname].new
                     self._data[colname].new = colvalue
                 else
-                    BACKTRACE(WARNING, "Not valid column value for update")
+                    err.requestError("Not valid column value for update")
                 end
             end
         end,
 
 
-        _add = function (self)
+        _addNew = function (self)
            
-            local ann = x:add(self.own_table.__tablename__, "interface")
-            self._data["id"] = {new=ann, old=ann}
+            local section = x:add(self.own_table.__configname__, 'interface')
+          
+            self._data["id"] = {new=section, old=section}
          
             for name, value in pairs(data) do
-           
-                x:set(self.own_table.__tablename__, ann, name, value)
+                if type(value) == "table" then
+                    for _, val in pairs(value) do
+                        x:set(self.own_table.__configname__, section, name, val)
+                    
+                    end
+                end 
+                x:set(self.own_table.__configname__, section, name, value)
             end
-            
-            x:commit(self.own_table.__tablename__)
-            -- for colname, colinfo in pairs(self._data) do
-            --     print(colname, colinfo)
-            --     for i,x in pairs(colinfo) do
-            --         print(i,x)
-            --     end
-            -- end
-        
-
-   
-
+            x:save (self.own_table.__configname__)
+            x:commit(self.own_table.__configname__)
 
         end,
 
         
         _update = function (self)
 
-                x:foreach(self.own_table.__tablename__, "interface", function(s)
+                x:foreach(self.own_table.__configname__, "interface", function(s)
                 
                 
                 local id = self._data.id.new
@@ -85,13 +87,10 @@ function Query(own_table, data)
                 if s['.name'] == id then
                     
                     for key, value in pairs(self._data) do
-                        x:set(self.own_table.__tablename__, id, key, value.new)
+                        x:set(self.own_table.__configname__, id, key, value.new)
                     end
-                
-                if x:commit(self.own_table.__tablename__) then
-                    print("ok")
-                end
-               
+                x:save (self.own_table.__configname__)
+                x:commit(self.own_table.__configname__)
                 end
                 end)
 
@@ -108,49 +107,80 @@ function Query(own_table, data)
                 
                 self:_update()
             else
-                self:_add()
+                self:_addNew()
             end
         end,
+        with_name = function (self,name)
+            x:set(self.own_table.__configname__,name, "interface")
 
-        -- delete row
+
+           for option, value in pairs(self._data) do
+                if type(value.new) == "table" then
+                    
+                    local ListJSON = cjson.encode(value.new)
+                    x:set(self.own_table.__configname__, name, ListJSON)
+                else
+                    x:set(self.own_table.__configname__, name, option, value.new)
+                end 
+           end
+       
+           x:commit(self.own_table.__configname__)
+        end,
+
+        validate = function (self, field, validators)
+           
+            local resultTable = {}
+            
+            for item in validators:gmatch("([^|]+)") do
+                table.insert(resultTable, item)
+            end
+        
+            local fieldValue = self._data[field].new -- Get the value of the field
+            
+            for _, valid in pairs(resultTable) do
+                if valid == "required" then
+                    if fieldValue == nil then
+                        return false, "Field is empty"
+                    end
+                else
+                    local length = valid:match("length:(%d+)")
+                    if length and fieldValue and string.len(fieldValue) > tonumber(length) then
+                        return false, "Field exceeds the required length"
+                    end
+                end
+               
+            end
+            return true
+        end,
+
         delete = function (self)
-            x:delete(self.own_table.__tablename__, self._data.id.new)
-            x:commit(self.own_table.__tablename__)
+
+            x:delete(self.own_table.__configname__, self._data.id.new)
+            x:commit(self.own_table.__configname__)
             
         end
     }
 
     if data then
-      
-
-        for colname, colvalue in pairs(data) do
-            if query.own_table:has_column(colname) then
-                colvalue = query.own_table:get_column(colname)
-                                          .field.to_type(colvalue)
-                query._data[colname] = {
-                    new = colvalue,
-                    old = colvalue
+        
+        for optname, optvalue in pairs(data) do
+            if query.own_table:has_column(optname) then
+                optvalue = query.own_table:get_column(optname)
+                                          .field.to_type(optvalue)
+                query._data[optname] = {
+                    new = optvalue,
+                    old = optvalue
                 }
             
             end
         end
     
     end
-    setmetatable(query, {__index = query._get_col,
-                         __newindex = query._set_col})
 
-    local tablename = query.own_table.__tablename__
-
-    if not _G.All_Tables[tablename] then
-        _G.All_Tables[tablename] = {}
-    end
-    
-    table.insert(_G.All_Tables[tablename], query)
-
+    setmetatable(query, {__index = query._get_opt,
+                         __newindex = query._set_opt})
 
     return query
 end
-
-
 
 return Query

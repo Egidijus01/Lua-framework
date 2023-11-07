@@ -3,6 +3,7 @@ local cjson = require("cjson")
 local validate = require("validations.validate_data")
 local valid_method = require("validations.validate_method")
 local B = require("base_class.base_route")
+local M = require("request.request_class")
 local err = require("utils.responses.error_response")
 
 local function params (env)
@@ -14,7 +15,6 @@ local function params (env)
     return parameters
 end
 
-print("1")
 local router = require("framew.router")
 
 -- Main body required by uhhtpd-lua plugin

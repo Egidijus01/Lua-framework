@@ -12,7 +12,7 @@ function Sample:new()
     setmetatable(Sample, {__index = Base})
     self.__index = self
     return obj
-end 
+end
 
 
 function Sample.index(request, response)
@@ -22,41 +22,52 @@ function Sample.index(request, response)
     return response()
 end
 function Sample:getSomg(request, response)
+   
+    
+    -- local users = User.get:all()
+    -- for i,x in pairs(users) do
+    -- print(i,x)
+    -- end
+
+    -- print(users)
+    
+
+    return response:with_status(205):response()
+
+
+end
+
+function Sample:handlePostUser(request, response)
+    
+   
+    local data = request.data
     local user1 = User({
-        username = "Antanas",
-        password = "Antanas123",
-        age = "64",
-        job = "Vairavimo instruktorius",
+        username = data.username,
+        password = data.password,
+        age = data.age,
+        job = data.job,
     
     })
+   
     user1:save()
-    print("User created")
+   
 
-    -- config:getTypedSections():where('address', NOT_EQUAL, '192.168.1.1')
-    -- config:getNamedSection()
-    -- config:getSections()
     
 
-    return response:with_status(205):response()
+    return response:with_status(201):with_message("User created"):response()
 
-
-end
-
-function Sample:handlePostUser(request, response, id)
-    -- print(request.headers['content-type'])
-
-    -- return self.response.with_status(201)
-    return response:with_status(205):response()
-end
-
-function Sample:create(request, response)
-    return response:with_status(205):response()
 
 end
 
 
 function Sample:deleteTest(request, response, id)
-    print("ID from handler:", id) 
+    print("ID from handler:", id)
+
+    local user = User.get:where({username = "Antanas"}):first()
+    user:delete()
+    -- for i,x in pairs(user) do print(i,x) end
+
+
     print("printas is delete")
     return response:with_status(205):response()
 
@@ -65,7 +76,12 @@ end
 function Sample:putTest(request, response)
     local email = "antanas@mail"
 
-    -- print(validators.validate_email(email))
+    local user = User.get:where({username = "Antanas"}):first()
+
+    user.username = "Antanukas"
+    user:save()
+
+
     print("printas is put")
   
     return response:with_status(205):response()

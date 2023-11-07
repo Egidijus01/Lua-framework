@@ -2,15 +2,15 @@ local models = {}
 
 
 
-local Table = require("orm.model")
+local Config = require("orm.model")
 local fields = require("orm.field_type")
 
-models.User = Table({
-    __tablename__ = "user",
-    username = fields.CharField({}),
-    password = fields.CharField({}),
-    age = fields.IntegerField({}),
-    job = fields.CharField({}),
+models.User = Config({
+    __configname__ = "user",
+    username = fields.Option(),
+    password = fields.Option(),
+    age = fields.Option(),
+    job = fields.Option(),
 
 })
 

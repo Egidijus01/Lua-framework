@@ -1,7 +1,6 @@
 local uci = require("uci")
-
+local Query = require("orm.query")
 local x = uci.cursor()
-
 local function return_match(data, rules)
     for _, table in ipairs(data) do
         local match = true
@@ -16,7 +15,16 @@ local function return_match(data, rules)
         end
     end
 end
-
+local function exclude_properties_with_dot(data)
+    local result = {}
+    for key, value in pairs(data) do
+        -- Check if the property name starts with a dot
+        if string.sub(key, 1, 1) ~= "." then
+            result[key] = value
+        end
+    end
+    return result
+end
 local Select = function(own_table)
     return {
 
@@ -29,10 +37,6 @@ local Select = function(own_table)
    
             
         },
-
-
-        
-
 
         where = function (self, args)
 
@@ -62,10 +66,7 @@ local Select = function(own_table)
         first = function (self)
             
             local data = self:all()
-            -- for i,x in pairs(data) do
-            --     print(i,x)
-            -- end
-            
+
             local table = return_match(data, self._rules.where)
             
             if table then
@@ -76,12 +77,24 @@ local Select = function(own_table)
 
         -- Return list of values
         all = function (self)
+            local res = {}
+            local data = x:get_all(self.own_table.__configname__)
 
-            local data = _G.All_Tables
+            
+            
+            local i =1
+            for id, table in pairs(data) do
+               
+                local info = exclude_properties_with_dot(table)
+                local object = Query(self.own_table, info)
+                object._data["id"] = {new=id, old=id}
 
-            local tablename = self.own_table.__tablename__
+                res[i] = object
+                i = i + 1
+            end
+ 
 
-            return data[tablename]
+            return res
         end,
 
     }

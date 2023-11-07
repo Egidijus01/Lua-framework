@@ -1,7 +1,6 @@
 local Router = {}
 local errors = require("utils.responses.error_response")
 local ResponseClass = require("utils.responses.diff_response")
--- local auth = require("middleware.auth")
 local RequestClass = require("request.request_class")
 
 function Router:new()
@@ -13,121 +12,70 @@ function Router:new()
     return obj
 end
 
+local function matchesRoutePath(routePath, requestPath, isRequired)
+    local path_without_id = routePath:match("(.-)/{(%w+%??)}$")
+    local path_without_last_part = requestPath:gsub('/[^/]+$', '')
 
-local function checkOptions(options)
-    
+    if isRequired then
+
+        return path_without_id == path_without_last_part
+    else
+        return path_without_id == path_without_last_part or path_without_id==requestPath  or routePath == requestPath
+    end
 end
 
+local function handleRoute(route, request, response, captures, env)
+    
+    
 
+    if route.options then
+        for _, option in pairs(route.options) do
+            local mod = require("middleware." .. option)
+            local res = mod.init(env)
 
+            if not res then
+                return errors.authError("Login required")
+            end
+            
+        end
+    end
+
+    local id = captures and captures[1] or nil
+    if type(route.handler) == "function" then
+        route:handler(request, response, id)
+    else
+        errors.existError("Handler not found")
+    end
+
+    return true
+end
 function Router:route()
-    local request = RequestClass:new(self.env.data, self.env.QUERY_STRING, self.env.headers)
     local request_path = self.env.REQUEST_URI:match("([^?]+)")
     local request_method = self.env.REQUEST_METHOD
     local response = ResponseClass:new()
-
+    local request = RequestClass:new(self.env.data, self.env.QUERY_STRING, self.env.headers)
 
     for _, route in pairs(self.routes) do
-        print(route.path, route.handler)
-        local route_pattern = route.path:gsub("{(%w+)}", "([%%d]*)"):gsub("{(%w+%?)}", "([%%d]*)")
+        route.path = string.gsub(route.path, "/$", "")
+        local route_pattern = route.path:gsub("{(%w+%??)}", "([%%w_]+)")
         local captures = {request_path:match(route_pattern)}
-        local path_without_id = route.path:match("(.-)/{(%w+%??)}$")
-        local is_required = not route.path:match("{(%w+%?)")
+        local is_required = not route.path:match("{(%w+%?)}")
 
-        local options = route.options
 
-      
-        if path_without_id then
-
-            if is_required then
-
-                local path_without_last_part = request_path:gsub('/[^/]+$', '')
+        if (route.method == request_method) and ((route.path == request_path) or (captures and matchesRoutePath(route.path, request_path, is_required))) then
+            return handleRoute(route, request, response, captures, self.env) 
                 
-                if captures and path_without_id == path_without_last_part and route.method == request_method then
-                    if options then
-                        for _, option in pairs(options) do
-                            local mod = require("middleware." .. option)
-                            local res = mod.init(self.env)
-
-                            if res then
-                                local id = captures[1]
-                                return route:handler(request, response, id)
-                            end
-                        end
-                    else
-                        local id = captures[1]
-                        return route:handler(request, response, id)
-                    end
-                end
-            elseif is_required == false then
-
-                local path_without_last_part = request_path:gsub("/%d+", "")
-
-                if path_without_id == path_without_last_part and route.method == request_method then
-
-                    if options then
-                        for _, option in pairs(options) do
-                            local mod = require("middleware." .. option)
-                            local res = mod.init(request)
-
-                            if res then
-                                local id = nil
-                                if type(route.handler) == "function" then                                    
-                                    return route:handler(request, response, id)
-                                else
-                                    return errors.existError("Handler not found")
-                                end
-                            else 
-                                return errors.authError("Invalid Authorization header")   
-                            end
-                        end
-                    else
-                        local id = captures[1]
-                        if type(route.handler) == "function" then                                    
-                            return route:handler(request, response, id)
-                        else
-                            return errors.existError("Handler not found")
-                        end
-                    end
-                end
-            end
-        
-        elseif route.path == request_path and route.method == request_method then
-
             
-            if options then
-                for _, option in pairs(options) do
-                    local mod = require("middleware." .. option)
-
-                    local res = mod.init(self.env)
-                    if res then
-                        if type(route.handler) == "function" then                                    
-                            return route:handler(request, response)
-                        else
-                            return errors.existError("Handler not found")
-                        end
-                    else 
-                        return errors.authError("Invalid Authorization header")               
-                    end
-                   
-                end
-            else 
-                if type(route.handler) == "function" then
-                    return route:handler(request, response)
-                    -- return route:handler(request)
-                else
-                    return errors.existError("Handler not found")
-                end
-            end
-        
-        
         end
-    
     end
-    return errors.existError("ROUTE DOESNT EXIST")
 
-
+    return errors.existError("ROUTE DOESN'T EXIST")
 end
+
+
+
+
+
 
 
 
@@ -172,12 +120,12 @@ end
 
 function Router:get(path, handler, options)
     local func = get_func(handler, "index")
-    print(func)
+
     if func then
-        table.insert(self.routes, { path = path, method = "GET", handler = func, options = options })        
-    -- else
-    --     return errors.existError(handler .. " Doesnt exist")
-    end 
+        table.insert(self.routes, { path = path, method = "GET", handler = func, options = options })
+    else
+        return errors.existError(handler .. " Doesnt exist")
+    end
     
 end
 
@@ -200,7 +148,7 @@ function Router:put(path, handler, options)
     end
     
 end
--- Other functions (e.g., trim_slash) can be defined here
+
 
 return Router
 

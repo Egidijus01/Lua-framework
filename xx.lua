@@ -1,51 +1,105 @@
 
+function Router:route()
+    local request = RequestClass:new(self.env.data, self.env.QUERY_STRING, self.env.headers)
+    local request_path = self.env.REQUEST_URI:match("([^?]+)")
+    local request_method = self.env.REQUEST_METHOD
+    local response = ResponseClass:new()
+for _, route in pairs(self.routes) do
+    print(route.path, route.handler)
+    local route_pattern = route.path:gsub("{(%w+)}", "([%%d]*)"):gsub("{(%w+%?)}", "([%%d]*)")
+    local captures = {request_path:match(route_pattern)}
+    local path_without_id = route.path:match("(.-)/{(%w+%??)}$")
+    local is_required = not route.path:match("{(%w+%?)")
 
+    local options = route.options
 
-DB = {
-    DEBUG = true,
-    new = true,
-    backtrace = true,
-    name = "database.db",
-    type = "sqlite3"
-}
+  
+    if path_without_id then
 
-local Table = require("orm.model")
-local fields = require("orm.tools.fields")
+        if is_required then
 
-local User = Table({
-    __tablename__ = "user",
-    username = fields.CharField({max_length = 100, unique = true}),
-    password = fields.CharField({max_length = 50, unique = true}),
-    age = fields.IntegerField({max_length = 2, null = true}),
-    job = fields.CharField({max_length = 50, null = true}),
-    time_create = fields.DateTimeField({null = true})
-})
+            local path_without_last_part = request_path:gsub('/[^/]+$', '')
+            
+            if captures and path_without_id == path_without_last_part and route.method == request_method then
+                if options then
+                    for _, option in pairs(options) do
+                        local mod = require("middleware." .. option)
+                        local res = mod.init(self.env)
 
-local News = Table({
-    __tablename__ = "news",
-    title = fields.CharField({max_length = 100, unique = false, null = false}),
-    text = fields.TextField({null = true}),
-    create_user_id = fields.ForeignKey({to = User})
-})
+                        if res then
+                            local id = captures[1]
+                            return route:handler(request, response, id)
+                        end
+                    end
+                else
+                    local id = captures[1]
+                    return route:handler(request, response, id)
+                end
+            end
+        elseif is_required == false then
 
+            local path_without_last_part = request_path:gsub("/%d+", "")
 
+            if path_without_id == path_without_last_part and route.method == request_method then
 
-local user = User({
-    username = "Bob Smith",
-    password = "SuperSecretPassword",
-    time_create = os.time()
-})
+                if options then
+                    for _, option in pairs(options) do
+                        local mod = require("middleware." .. option)
+                        local res = mod.init(request)
 
-user.username = "John Smith"
-user:save()
+                        if res then
+                            local id = nil
+                            if type(route.handler) == "function" then                                    
+                                return route:handler(request, response, id)
+                            else
+                                return errors.existError("Handler not found")
+                            end
+                        else 
+                            return errors.authError("Invalid Authorization header")   
+                        end
+                    end
+                else
+                    local id = captures[1]
+                    if type(route.handler) == "function" then                                    
+                        return route:handler(request, response, id)
+                    else
+                        return errors.existError("Handler not found")
+                    end
+                end
+            end
+        end
+    
+    elseif route.path == request_path and route.method == request_method then
 
+        
+        if options then
+            for _, option in pairs(options) do
+                local mod = require("middleware." .. option)
 
+                local res = mod.init(self.env)
+                if res then
+                    if type(route.handler) == "function" then                                    
+                        return route:handler(request, response)
+                    else
+                        return errors.existError("Handler not found")
+                    end
+                else 
+                    return errors.authError("Invalid Authorization header")               
+                end
+               
+            end
+        else 
+            if type(route.handler) == "function" then
+                return route:handler(request, response)
+                -- return route:handler(request)
+            else
+                return errors.existError("Handler not found")
+            end
+        end
+    
+    
+    end
 
-local first_user = User.get:first()
-print(first_user.username)
-print("--------------------------------")
-for i,x in pairs(first_user) do
-
-    print(i,x)
 end
-print("--------------------------------")
+return errors.existError("ROUTE DOESNT EXIST")
+end
