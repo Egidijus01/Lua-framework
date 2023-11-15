@@ -1,25 +1,18 @@
-------------------------------------------------------------------------------
---                                  Libs                                   --
-------------------------------------------------------------------------------
+local uci = require("uci")
 
+local x = uci:cursor()
 
-Field = require('orm.fields')
+local type = x:get("framework", "orm", "type")
 
+local models
 
+if type == "uci" then
+    models = require("orm.uci_orm.field_type")
+elseif type == "sql" then
+    models = require("orm.sql_orm.class.fields")
+else
+    -- Handle unsupported ORM type or other cases
+    error("Unsupported ORM type: " .. type)
+end
 
-
-
-local field = {}
-
-setmetatable(field, {__index = Field});
-
-
-
-
-field.Option = Field:register()
-
-field.List = Field:register()
-
-
-
-return field
+return models

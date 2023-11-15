@@ -11,7 +11,6 @@ models.User = Config({
     password = fields.Option(),
     age = fields.Option(),
     job = fields.Option(),
-
 })
 
 

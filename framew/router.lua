@@ -30,7 +30,7 @@ local function handleRoute(route, request, response, captures, env)
         for _, option in pairs(route.options) do
             local mod = require("middleware." .. option)
             local res = mod.init(env)
-
+            
             if not res then
                 return errors.authError("Login required")
             end

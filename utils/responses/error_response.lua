@@ -16,4 +16,7 @@ end
 function M.headerError(error)
     return response.send_response(codes.NOT_FOUND, error)
 end
+function M.sqlError(error)
+    return response.send_response(codes.INTERNAL_SERVER_ERROR, error)
+end
 return M

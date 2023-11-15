@@ -8,6 +8,7 @@ local M = {}
 
 local function checkIfTokenIsValid(token)
     local res = conn:call("session", "list", {ubus_rpc_session=token})
+    print(res)
     if res then
         if res.ubus_rpc_session==token then
             return true            
@@ -21,8 +22,9 @@ end
 
 function M.init(request)
     local token = request.headers['authorization']
-
+    print(token)
     if token == nil then
+        
         return false
     end 
 

@@ -1,5 +1,5 @@
 local uci = require("uci")
-local Query = require("orm.query")
+local Query = require("orm.uci_orm.query")
 local x = uci.cursor()
 local function return_match(data, rules)
     for _, table in ipairs(data) do

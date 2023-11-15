@@ -15,13 +15,13 @@ function Sample:new()
 end
 
 
-function Sample:index(request, response)
+function Sample.index(request, response)
 
     print("print is index")
     
     return response:with_status(205):response()
 end
-function Sample:getSomg(request, response)
+function Sample.getSomg(request, response)
    
     
     local users = User.get:all()
@@ -35,7 +35,7 @@ function Sample:getSomg(request, response)
 
 end
 
-function Sample:handlePostUser(request, response)
+function Sample.handlePostUser(request, response)
     
    
     local data = request.data
@@ -73,7 +73,7 @@ function Sample:handlePostUser(request, response)
 end
 
 
-function Sample:deleteTest(request, response, id)
+function Sample.deleteTest(request, response, id)
     print("ID from handler:", id)
 
     local user = User.get:where({username = "Antanas"}):first()
@@ -86,7 +86,7 @@ function Sample:deleteTest(request, response, id)
 
 end
 
-function Sample:putTest(request, response)
+function Sample.putTest(request, response)
     local email = "antanas@mail"
 
     local user = User.get:where({username = "Antanas"}):first()
@@ -101,7 +101,7 @@ function Sample:putTest(request, response)
 
 end
 
-function Sample:Login(request, response)
+function Sample.Login(request, response)
     local data = request.data
 
     local res = auth:Login(data.username, data.password)
