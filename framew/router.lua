@@ -2,6 +2,8 @@ local Router = {}
 local errors = require("utils.responses.error_response")
 local ResponseClass = require("utils.responses.diff_response")
 local RequestClass = require("request.request_class")
+local _stack = {}
+
 
 function Router:new()
     local obj = {}
@@ -40,7 +42,6 @@ local function handleRoute(route, request, response, captures, env)
 
     local id = captures and captures[1] or nil
     if type(route.handler) == "function" then
-
         route.handler(request, response, id)
     else
         errors.existError("Handler not found")
@@ -66,12 +67,20 @@ function Router:route()
         if (route.method == request_method) and ((route.path == request_path) or (captures and matchesRoutePath(route.path, request_path, is_required))) then
             
             return handleRoute(route, request, response, captures, self.env) 
-                
-            
+
         end
+
     end
 
-    return errors.existError("ROUTE DOESN'T EXIST")
+    print(#_stack)
+    if #_stack > 0 then
+        local tabl = _stack[1]
+        return tabl[1](tabl[2])
+    else
+        return errors.existError("ROUTE DOESN'T EXIST")
+
+    end
+
 end
 
 
@@ -122,9 +131,9 @@ function Router:post(path, handler, options)
     if func then
         table.insert(self.routes, { path = path, method = "POST", handler = func, options = options })
     else
-        return errors.existError(handler .. " Method doesnt exist")
+        table.insert(_stack, {errors.existError, " Method doesnt exist"})
+        
     end
-    
 end
 
 function Router:get(path, handler, options)
@@ -134,7 +143,9 @@ function Router:get(path, handler, options)
     if func then
         table.insert(self.routes, { path = path, method = "GET", handler = func, options = options })
     else
-        return errors.existError(handler .. " Method doesnt exist")
+
+        table.insert(_stack, {errors.existError, handler .. " Method doesnt exist"})
+
     end
     
 end
@@ -144,7 +155,8 @@ function Router:delete(path, handler, options)
     if func then
         table.insert(self.routes, { path = path, method = "DELETE", handler = func, options = options })
     else
-        return errors.existError(handler .. " Method doesnt exist")
+        table.insert(_stack, {errors.existError, handler .. " Method doesnt exist"})
+
     end
     
 end
@@ -154,7 +166,8 @@ function Router:put(path, handler, options)
     if func then
         table.insert(self.routes, { path = path, method = "PUT", handler = func, options = options })
     else
-        return errors.existError(handler .. " Method doesnt exist")
+        table.insert(_stack, {errors.existError, handler .. " Method doesnt exist"})
+
     end
 end
 
