@@ -44,7 +44,7 @@ local fields = require("orm.field_type")
 
 
 ## Initialize router object
-
+```
 local router = require("framew.router")
 local rr = router:new()
 
@@ -53,9 +53,10 @@ or
 rr:post("/api/create", "posts.createUser", {auth})
 
 return rr
-
+```
 ## In endpoint.lua require routes instance and initialize 
-function route()
+```
+
 
 local endpoint = {}
 
@@ -66,11 +67,12 @@ function endpoint:handle_request()
 
 end
 return endpoint
-
+```
 
 ## Usage for Sql
 
  - Create model
+```
 models.User = Table({
     __tablename__ = "user",
     username = fields.CharField({max_length = 100, unique = true}),
@@ -79,13 +81,15 @@ models.User = Table({
     job = fields.CharField({max_length = 50, null = true}),
     time_create = fields.DateTimeField({null = true})
 })
-
+```
  - In Your controller file require model
+```
 local models = require("http.models.posts_models")
 local User = models.User
-
+```
 
  - Example
+```
 function Sample.createUser(request, response)
     local data = request.data
    
@@ -99,32 +103,34 @@ function Sample.createUser(request, response)
    
     return response:with_message("Ok"):response()
 end
-
+```
 ## Other User methods
 
-Get
+ - Get
+```
 local users = User.get:all()
-print("We get " .. users:count() .. " users")
 users = User.get:limit(2):all()
 users = User.get:limit(2):offset(2):all()
 users = User.get:order_by({desc('age')}):all()
 users = User.get:group_by({'age'}):all()
 user = User.get:where({username = "First user"}):first()
 users = User.get:group_by({'id'}):having({age = 44}):all()
+```
 
-
-Update
+ - Update
+```
 user.username = "John Smith"
 user:save()
-
+```
 Delete
+```
 User.get:where({username = "SomebodyNew"}):delete()
-
+```
 
 ## Usage for uci 
 
 ## model example
-
+```
 models.User = Config({
     __configname__ = "user",
     username = fields.Option(),
@@ -132,10 +138,11 @@ models.User = Config({
     age = fields.Option(),
     job = fields.Option(),
 })
-
+```
 ## User methods
 
  - Create
+```
 local user1 = User({
         username = data.username,
         password = data.password,
@@ -144,23 +151,26 @@ local user1 = User({
  
     })
 user1:save()
-user1:with_name(name)  Named section
+user1:with_name(name)  --Named section
+```
  - Get
+```
 local user = User.get:where({username = "Antanas"}):first()
 local user = User.get:all()
-
+```
  - Update
-
+```
 local user = User.get:where({username = "name"}):first()
 user.username = "name1"
 user:save()
-
+```
 
  - Delete
+```
  user:delete()
-
+```
  - Validate 
-
+```
 local condition, msg = user1:validate('age', "required|length:5")
     if condition then
         user1:save()
@@ -168,3 +178,4 @@ local condition, msg = user1:validate('age', "required|length:5")
     else
         return response:with_status(400):with_message(msg):response()
     end
+```
