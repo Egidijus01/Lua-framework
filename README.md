@@ -1,7 +1,7 @@
 # Lua-framework
 
 
-Dependencies
+##Dependencies
 
 ubus, cjson, uci
 
@@ -22,29 +22,36 @@ I created a framework during my internship that integrates essential OpenWRT ser
 
  - In http directory create file where you will store Models
 
-## Required imports 
+### Required imports 
 
 local Table = require("orm.model")
 local fields = require("orm.field_type")
 
  - Create directory controllers where you will store you controller files
+ - Controller example
+```lua
+function Sample.index(request, response)
+    --Do stuff
+    return response:response()
+end
+```
 
- ## Every controller must have response
+ ### Every controller must have response
  
  - response:with_message(message):response()
  - response:with_json(json):response()
  - return response:with_status(400):response()
  - return response:with_status(200):with_message(res):response()
 
-## request contains
+### request contains
 
  - local data = request.data   Json data
  - local data = request.headers   Headers data
  - local data = request:query_table()   Query  data
 
 
-## Initialize router object
-```
+### Initialize router object
+```lua
 local router = require("framew.router")
 local rr = router:new()
 
@@ -54,8 +61,8 @@ rr:post("/api/create", "posts.createUser", {auth})
 
 return rr
 ```
-## In endpoint.lua require routes instance and initialize 
-```
+### In endpoint.lua require routes instance and initialize 
+```lua
 
 
 local endpoint = {}
@@ -71,8 +78,8 @@ return endpoint
 
 ## Usage for Sql
 
- - Create model
-```
+ ### Create model
+```lua
 models.User = Table({
     __tablename__ = "user",
     username = fields.CharField({max_length = 100, unique = true}),
@@ -82,14 +89,14 @@ models.User = Table({
     time_create = fields.DateTimeField({null = true})
 })
 ```
- - In Your controller file require model
-```
+ ### In Your controller file require model
+```lua
 local models = require("http.models.posts_models")
 local User = models.User
 ```
 
  - Example
-```
+```lua
 function Sample.createUser(request, response)
     local data = request.data
    
@@ -104,10 +111,10 @@ function Sample.createUser(request, response)
     return response:with_message("Ok"):response()
 end
 ```
-## Other User methods
+### Other User methods
 
  - Get
-```
+```lua
 local users = User.get:all()
 users = User.get:limit(2):all()
 users = User.get:limit(2):offset(2):all()
@@ -118,19 +125,19 @@ users = User.get:group_by({'id'}):having({age = 44}):all()
 ```
 
  - Update
-```
+```lua
 user.username = "John Smith"
 user:save()
 ```
-Delete
-```
+ - Delete
+```lua
 User.get:where({username = "SomebodyNew"}):delete()
 ```
 
 ## Usage for uci 
 
-## model example
-```
+### model example
+```lua
 models.User = Config({
     __configname__ = "user",
     username = fields.Option(),
@@ -139,10 +146,10 @@ models.User = Config({
     job = fields.Option(),
 })
 ```
-## User methods
+### User methods
 
  - Create
-```
+```lua
 local user1 = User({
         username = data.username,
         password = data.password,
@@ -154,23 +161,23 @@ user1:save()
 user1:with_name(name)  --Named section
 ```
  - Get
-```
+```lua
 local user = User.get:where({username = "Antanas"}):first()
 local user = User.get:all()
 ```
  - Update
-```
+```lua
 local user = User.get:where({username = "name"}):first()
 user.username = "name1"
 user:save()
 ```
 
  - Delete
-```
+```lua
  user:delete()
 ```
  - Validate 
-```
+```lua
 local condition, msg = user1:validate('age', "required|length:5")
     if condition then
         user1:save()
