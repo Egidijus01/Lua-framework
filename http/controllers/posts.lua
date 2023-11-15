@@ -3,7 +3,7 @@ local auth = UbusAuth:new()
 local Base = require("base_class.base_route")
 local models = require("http.models.posts_models")
 local User = models.User
-
+local res = require("utils.responses.response")
 local b = Base:new()
 local Sample = {}
 function Sample:new()
@@ -15,19 +15,17 @@ function Sample:new()
 end
 
 
-function Sample.index(request, response)
+function Sample:index(request, response)
 
     print("print is index")
     
-    return response()
+    return response:with_status(205):response()
 end
 function Sample:getSomg(request, response)
    
     
-    -- local users = User.get:all()
-    -- for i,x in pairs(users) do
-    -- print(i,x)
-    -- end
+    local users = User.get:all()
+
 
     -- print(users)
     
@@ -41,6 +39,7 @@ function Sample:handlePostUser(request, response)
     
    
     local data = request.data
+    print(data.username)
     local user1 = User({
         username = data.username,
         password = data.password,
@@ -49,12 +48,26 @@ function Sample:handlePostUser(request, response)
     
     })
    
-    user1:save()
-   
 
+    local cond, msg = user1:validate('age', "required|length:5")
+    if cond then
+        user1:save()
+        return response:with_status(201):with_message("User created"):response()     
+    else
+        return response:with_status(400):with_message(msg):response()
+    end
+
+    -- local user2 = User({
+    --     username = data.username,
+    --     password = data.password,
+    --     age = data.age,
+    --     job = "daraaaabas",
     
+    -- })
 
-    return response:with_status(201):with_message("User created"):response()
+    -- user2:with_name("kazkas1")
+
+
 
 
 end
@@ -89,14 +102,15 @@ function Sample:putTest(request, response)
 end
 
 function Sample:Login(request, response)
-    local data = b.data
+    local data = request.data
 
     local res = auth:Login(data.username, data.password)
-
+    
     if res then
-        return response:with_message(res):response()
+        return response:with_status(200):with_message(res):response()
     else
         return response:with_status(404):with_message("Not found"):response()
     end
+
 end
 return Sample

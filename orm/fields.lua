@@ -3,20 +3,7 @@
 ------------------------------------------------------------------------------
 
 local Field = {
-    -- Table column type
-    __type__ = "varchar",
-
-    -- Validator handler
-    validator = function (self, value)
-        return true
-    end,
-
-    -- Default parser
-    as = function (value)
-        return value
-    end,
-
-    to_type = Type.to.str,
+    
 
     -- Call when create new field in some table
     register = function (self, args)

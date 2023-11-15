@@ -1,10 +1,10 @@
 
 -- local headers = require("validations.headers.required_headers")
-
+local err = require("utils.responses.error_response")
 local ubus = require "ubus"
 local conn = ubus.connect()
 if not conn then
-    error("Failed to connect to ubusd")
+    err.authError("Ubusd is not available")
 end
 
 
@@ -14,10 +14,10 @@ end
 local Ubus_auth = {}
 
 local function getToken(username, password)
+  
     local res = conn:call("session", "login", { username = username, password = password })
 
     if res then
-
         local token = res.ubus_rpc_session
         -- local list = conn:call("session", "list", {ubus_rpc_session=token})
         return token

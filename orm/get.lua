@@ -25,10 +25,10 @@ local function exclude_properties_with_dot(data)
     end
     return result
 end
-local Select = function(own_table)
+local Select = function(own_config)
     return {
 
-        own_table = own_table,
+        own_config = own_config,
 
         -- Create select rules
         _rules = {
@@ -78,7 +78,7 @@ local Select = function(own_table)
         -- Return list of values
         all = function (self)
             local res = {}
-            local data = x:get_all(self.own_table.__configname__)
+            local data = x:get_all(self.own_config.__configname__)
 
             
             
@@ -86,7 +86,7 @@ local Select = function(own_table)
             for id, table in pairs(data) do
                
                 local info = exclude_properties_with_dot(table)
-                local object = Query(self.own_table, info)
+                local object = Query(self.own_config, info)
                 object._data["id"] = {new=id, old=id}
 
                 res[i] = object

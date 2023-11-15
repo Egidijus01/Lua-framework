@@ -1,8 +1,10 @@
-sample = {}
-local lualog = require("lualog")
+local sample = {}
+
 local cjson = require("cjson")
 local parse = require("validations.parse")
 local headers = require("validations.headers.required_headers")
+
+
 
 local validation_rules = {
     required_headers = headers.required_headers, -- List of required headers
@@ -13,6 +15,9 @@ local validation_rules = {
 
 -- Function to validate the request
 function sample.validate_request(env, data)
+    if not data then
+        data = {}
+    end
     
     local response = {}
     -- Check required headers
@@ -24,9 +29,9 @@ function sample.validate_request(env, data)
 
     -- Check content type
     local content_type = env.headers["content-type"]
-    -- if not content_type or not is_allowed_content_type(content_type) then
-    --     return false, "Invalid or unsupported Content-Type header"
-    -- end
+    if not content_type then
+        return false, "No Content-type header"
+    end
 
 
     if content_type == "application/json" then
@@ -37,7 +42,7 @@ function sample.validate_request(env, data)
         if status then
             response = content
         else
-            return false
+            return false, "Invalid json data"
         end
 
     elseif string.match(content_type, "multipart/form%-data") then
@@ -46,7 +51,7 @@ function sample.validate_request(env, data)
         if status then
             response = content
         else
-            return false
+            return false, "Invalid multipart/form data"
         end
 
     elseif content_type == "application/x-www-form-urlencoded" then
@@ -55,14 +60,13 @@ function sample.validate_request(env, data)
         if status then
             response = content
         else
-            return false
+            return false, "Invalid x-www-form-urlencoded data"
         end
     
     else
-        return false
+        return false, "Content type is not supported"
     end
 
-
-    return true, "Request is valid", response
+    return true, "", response
 end
 return sample

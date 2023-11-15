@@ -46,7 +46,7 @@ function handle_request(env)
 
     local is_valid, validation_message, content = validate.validate_request(env, request_body)
 
-    local d = valid_method.validateRequestMethod(env.REQUEST_METHOD)
+    local d, mess = valid_method.validateRequestMethod(env.REQUEST_METHOD)
 
     if is_valid and d then
 
@@ -58,8 +58,13 @@ function handle_request(env)
         endpoint.request_body = request_body
         endpoint:handle_request()
     else
-
-        err.requestError(validation_message)
+        if mess then
+            err.requestError(mess)
+            print("hr")
+        else
+            print("nz")
+            err.requestError(validation_message)
+        end
     end
 
 end

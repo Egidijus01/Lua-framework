@@ -1,7 +1,9 @@
 # Lua-framework
 
 
+Dependencies
 
+ubus, cjson, uci
 
 
 

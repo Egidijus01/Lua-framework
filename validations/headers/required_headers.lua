@@ -1,4 +1,4 @@
-sample = {}
+local sample = {}
 
 
 sample.required_headers = {"content-type"}-- List of required headers

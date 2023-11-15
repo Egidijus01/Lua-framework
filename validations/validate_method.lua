@@ -17,7 +17,7 @@ function sample.validateRequestMethod(requestMethod)
     end
 
     
-    return false
+    return false, "Method is not allowed"
 end
 
 

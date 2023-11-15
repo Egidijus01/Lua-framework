@@ -153,11 +153,16 @@ function Config.new(self, args)
         -- @return {table} get column instance if column exist
         -----------------------------------------
         get_column = function (self, colname)
-            for _, table_column in pairs(self.__optnames) do
-                if table_column.name == colname then
-                    return table_column
-                end
+            -- print(self.__optnames[1][1])
+            for _, table_column in pairs(self.__optnames[2]) do
+                print(table_column)
             end
+            -- for _, table_column in pairs(self.__optnames) do
+            --     if table_column.name == colname then
+                    
+            --         return table_column
+            --     end
+            -- end
 
             
         end

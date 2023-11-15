@@ -21,6 +21,11 @@ function M:with_message(message)
     self.message = message
     return self
 end
+function M:with_json(response)
+    self.message = response
+
+    return self
+end
 function M:response()
     uhttpd.send("Status: " .. self.status .. " \r\n")
     uhttpd.send("Content-Type: application/json\r\n\r\n")
@@ -30,15 +35,7 @@ end
 
 
 
--- function M.with_json(response)
---     local res = response or {}
---     uhttpd.send("Status: ", self.status ," \r\n")
---     uhttpd.send("Content-Type: application/json\r\n\r\n")
 
---     setmetatable(res, cjson.array_mt)
-
---     uhttpd.send(cjson.encode(res))
--- end
 
 
 return M
