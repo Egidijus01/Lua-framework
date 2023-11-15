@@ -88,7 +88,7 @@ local function get_func(handler, default)
         local pattern = "([^%.]+)%.?(.*)"
         local file_name, func_name = string.match(handler, pattern)
 
-        local prefix = "/www/cgi-bin/http/controllers/"
+        local prefix = "/www/http/controllers/"
         local f, err = loadfile(prefix .. file_name .. ".lua")
 
         if func_name == nil or func_name == "" then

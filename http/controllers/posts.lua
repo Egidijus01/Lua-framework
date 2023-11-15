@@ -26,11 +26,13 @@ function Sample.getSomg(request, response)
     
     local users = User.get:all()
 
-
-    -- print(users)
+    local data = {}
+    for i,x in pairs(users) do
+        table.insert(data, {x.username, x.password, x.age, x.job})
+    end 
     
 
-    return response:with_status(205):response()
+    return response:with_json(data):response()
 
 
 end
@@ -57,19 +59,6 @@ function Sample.handlePostUser(request, response)
         return response:with_status(400):with_message(msg):response()
     end
 
-    -- local user2 = User({
-    --     username = data.username,
-    --     password = data.password,
-    --     age = data.age,
-    --     job = "daraaaabas",
-    
-    -- })
-
-    -- user2:with_name("kazkas1")
-
-
-
-
 end
 
 
@@ -93,7 +82,6 @@ function Sample.putTest(request, response)
 
     user.username = "Antanukas"
     user:save()
-
 
     print("printas is put")
   
