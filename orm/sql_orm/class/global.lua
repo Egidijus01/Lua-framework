@@ -29,21 +29,13 @@ function BACKTRACE(tracetype, message)
     if DB.backtrace then
         if tracetype == ERROR then
 
-            err.sqlError("[SQL:Error] " .. message)
+            err.sqlError("SQL:Error " .. message)
             os.exit()
 
-        elseif tracetype == WARNING then
-            print("[SQL:Warning] " .. message)
-
-
-        elseif tracetype == INFO then
-            print("[SQL:Info] " .. message)
         end
     end
 
-    if DB.DEBUG and tracetype == DEBUG then
-        print("[SQL:Debug] " .. message)
-    end
+ 
 end
 
 function string.endswith(String, End)

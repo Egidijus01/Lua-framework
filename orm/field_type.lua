@@ -9,7 +9,7 @@ local models
 if type == "uci" then
     models = require("orm.uci_orm.field_type")
 elseif type == "sql" then
-    models = require("orm.sql_orm.class.fields")
+    models = require("orm.sql_orm.tools.fields")
 else
     -- Handle unsupported ORM type or other cases
     error("Unsupported ORM type: " .. type)

@@ -2,7 +2,7 @@
 local router = require("framew.router")
 
 local rr = router:new()
-rr:post("/api/create/", "posts.handlePostUser")
+rr:post("/api/create", "posts.handlePostUser")
 rr:get("/api/get", "posts.getSomg")
 rr:get("/api/get1", function (request, response)
     

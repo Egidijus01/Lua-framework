@@ -2,7 +2,7 @@
 --                               Require                                    --
 ------------------------------------------------------------------------------
 
-require('orm.sql_orm.class.global.class.global')
+require('orm.sql_orm.class.global')
 require("orm.sql_orm.tools.func")
 
 local Table = require('orm.sql_orm.class.table')
@@ -26,7 +26,7 @@ POSTGRESQL = "postgresql"
 ------------------------------------------------------------------------------
 
 if not DB then
-    print("[SQL:Startup] Can't find global database settings variable 'DB'. Creating empty one.")
+
     DB = {}
 end
 
@@ -39,7 +39,8 @@ DB = {
     type = DB.type or "sqlite3",
     -- if you use sqlite set database path value
     -- if not set a database name
-    name = DB.name or "database.db",
+    
+    name = DB.name or "/www/database.db",
     -- not sqlite db settings
     host = DB.host or nil,
     port = DB.port or nil,

@@ -23,50 +23,58 @@ function Sample.index(request, response)
 end
 function Sample.getSomg(request, response)
    
-    
     local users = User.get:all()
+print("We get " .. users:count() .. " users")
+    -- local users = User.get:all()
 
-    local data = {}
-    for i,x in pairs(users) do
-        table.insert(data, {x.username, x.password, x.age, x.job})
-    end 
-    
+    -- local data = {}
+    -- for i,x in pairs(users) do
+    --     table.insert(data, {x.username, x.password, x.age, x.job})
+    -- end 
+    print(request:query_table())
 
-    return response:with_json(data):response()
+    return response:with_message("Ok"):response()
 
 
 end
 
 function Sample.handlePostUser(request, response)
     
-   
-    local data = request.data
-    print(data.username)
-    local user1 = User({
-        username = data.username,
-        password = data.password,
-        age = data.age,
-        job = data.job,
+    -- print(User)
+    -- local data = request.data
+    -- print(data.username)
+    -- local user1 = User({
+    --     username = data.username,
+    --     password = data.password,
+    --     age = data.age,
+    --     job = data.job,
+ 
+    -- })
     
+    -- user1:save()
+    local user = User({
+        username = "Bob Smith",
+        password = "SuperSecretPassword",
+        time_create = os.time()
     })
-   
+    user:save()
 
-    local cond, msg = user1:validate('age', "required|length:5")
-    if cond then
-        user1:save()
-        return response:with_status(201):with_message("User created"):response()     
-    else
-        return response:with_status(400):with_message(msg):response()
-    end
-
+    -- local cond, msg = user1:validate('age', "required|length:5")
+    -- if cond then
+    --     user1:save()
+    --     return response:with_status(201):with_message("User created"):response()     
+    -- else
+    --     return response:with_status(400):with_message(msg):response()
+    -- end
+    return response:with_message("Ok"):response()
 end
 
 
 function Sample.deleteTest(request, response, id)
     print("ID from handler:", id)
 
-    local user = User.get:where({username = "Antanas"}):first()
-    user:delete()
+    -- local user = User.get:where({username = "Antanas"}):first()
+    -- user:delete()
     -- for i,x in pairs(user) do print(i,x) end
 
 
@@ -78,10 +86,10 @@ end
 function Sample.putTest(request, response)
     local email = "antanas@mail"
 
-    local user = User.get:where({username = "Antanas"}):first()
+    -- local user = User.get:where({username = "Antanas"}):first()
 
-    user.username = "Antanukas"
-    user:save()
+    -- user.username = "Antanukas"
+    -- user:save()
 
     print("printas is put")
   
