@@ -22,18 +22,19 @@ function Sample.index(request, response)
     return response:with_status(205):response()
 end
 function Sample.getSomg(request, response)
-   
-    local users = User.get:all()
-print("We get " .. users:count() .. " users")
-    -- local users = User.get:all()
+    -- local users = User.get:where({username="Anss"}):all()
 
-    -- local data = {}
-    -- for i,x in pairs(users) do
-    --     table.insert(data, {x.username, x.password, x.age, x.job})
-    -- end 
+-- print("We get " .. users:count() .. " users")
+
+    local users = User.get:all()
+
+    local data = {}
+    for i,x in pairs(users) do
+        table.insert(data, {x.username, x.password, x.age, x.job})
+    end 
     print(request:query_table())
 
-    return response:with_message("Ok"):response()
+    return response:with_json(users):response()
 
 
 end
@@ -41,32 +42,36 @@ end
 function Sample.handlePostUser(request, response)
     
     -- print(User)
-    -- local data = request.data
+    local data = request.data
     -- print(data.username)
-    -- local user1 = User({
-    --     username = data.username,
-    --     password = data.password,
-    --     age = data.age,
-    --     job = data.job,
+    local user1 = User({
+        username = data.username,
+        password = data.password,
+        age = data.age,
+        job = data.job,
  
-    -- })
+    })
     
     -- user1:save()
-    local user = User({
-        username = "Bob Smith",
-        password = "SuperSecretPassword",
-        time_create = os.time()
-    })
-    user:save()
+    -- local user = User({
+    --     username = "Bob Smith",
+    --     password = "SuperSecretPassword",
+    --     time_create = os.time()
+    -- })
+    -- print(user:save())
 
-    -- local cond, msg = user1:validate('age', "required|length:5")
-    -- if cond then
-    --     user1:save()
-    --     return response:with_status(201):with_message("User created"):response()     
-    -- else
-    --     return response:with_status(400):with_message(msg):response()
-    -- end
-    return response:with_message("Ok"):response()
+    local cond, msg = user1:validate('username', "required|length:5|email|letters|numbers")
+    if cond then
+        print("Isv")
+        user1:save()
+        return response:with_status(201):with_message("User created"):response() 
+
+    else
+        print("nIsv")
+
+        return response:with_status(400):with_message(msg):response()
+    end
+    -- return response:with_message("Ok"):response()
 end
 
 

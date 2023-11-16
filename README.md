@@ -1,9 +1,14 @@
 # Lua-framework
 
 
-##Dependencies
-
-ubus, cjson, uci
+## Dependencies
+ - luarocks install luasql-sqlite3
+ - luarocks install luasql-postgres
+ - luarocks install luasql-mysql
+ - luarocks install luasql-sqlite
+ - luarocks install luasql-cjson
+ - ubus
+ - uci
 
 
 
@@ -18,8 +23,7 @@ I created a framework during my internship that integrates essential OpenWRT ser
 
 
 ## General usage
- - /etc/config/framework change 'orm' section 'type' to sql or uci
-
+ - in http directory file config.lua change 'settings' section 'orm' to sql or uci
  - In http directory create file where you will store Models
 
 ### Required imports 
@@ -56,15 +60,15 @@ local router = require("framew.router")
 local rr = router:new()
 
 rr:post("/api/create", "posts.createUser")
-or 
-rr:post("/api/create", "posts.createUser", {auth})
+rr:post("/api/delete/{id}", "posts.deleteUser") --required id, route could look like this -> localhost/api/delete/1
+rr:post("/api/delete/{id?}", "posts.deleteUser") --optional id, route could look like this -> localhost/api/delete/1 or localhost/api/delete
+ -- or 
+rr:post("/api/create", "posts.createUser", {"auth"}) -- only authentificated users can access this endpoint
 
 return rr
 ```
 ### In endpoint.lua require routes instance and initialize 
 ```lua
-
-
 local endpoint = {}
 
 local rr = require("http.routes.routes")
@@ -77,6 +81,17 @@ return endpoint
 ```
 
 ## Usage for Sql
+ - in http directory file config.lua change 'DB' settings
+
+ ```
+ settings.DB = {
+    DEBUG = true,
+    new = true,
+    backtrace = true,
+    name = "database.db",
+    type = "sqlite3",
+}
+ ```
 
  ### Create model
 ```lua
@@ -133,6 +148,8 @@ user:save()
 ```lua
 User.get:where({username = "SomebodyNew"}):delete()
 ```
+### More Info About Sql ORM
+ - https://github.com/itdxer/4DaysORM
 
 ## Usage for uci 
 
@@ -163,7 +180,9 @@ user1:with_name(name)  --Named section
  - Get
 ```lua
 local user = User.get:where({username = "Antanas"}):first()
-local user = User.get:all()
+local user = User.get:all_obj() -- returns all users as objects
+local user = User.get:all() -- returns all users info in tables it can be converted to json
+
 ```
  - Update
 ```lua
@@ -176,7 +195,11 @@ user:save()
 ```lua
  user:delete()
 ```
- - Validate 
+ - Validate
+ Available validations: 
+```lua
+" required|length:x|email|letters|numbers "
+```
 ```lua
 local condition, msg = user1:validate('age', "required|length:5")
     if condition then

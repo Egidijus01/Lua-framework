@@ -79,5 +79,13 @@ field.ForeignKey = Field:register({
     },
     to_type = Type.to.number
 })
+field.ManyToManyField = Field:register({
+    __type__ = "integer",
+    settings = {
+        null = true,
+        foreign_key = true
+    },
+    to_type = Type.to.number
+})
 
 return field

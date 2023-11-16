@@ -1,7 +1,8 @@
 ------------------------------------------------------------------------------
 --                               Require                                    --
 ------------------------------------------------------------------------------
-
+local config = require('http.config')
+DB = config.DB
 require('orm.sql_orm.class.global')
 require("orm.sql_orm.tools.func")
 

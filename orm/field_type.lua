@@ -1,18 +1,19 @@
-local uci = require("uci")
+local err = require("utils.responses.error_response")
 
-local x = uci:cursor()
+local settings = require("http.config")
+local orm_t = settings.orm
 
-local type = x:get("framework", "orm", "type")
+
 
 local models
 
-if type == "uci" then
+if orm_t.orm == "uci" then
     models = require("orm.uci_orm.field_type")
-elseif type == "sql" then
+elseif orm_t.orm == "sql" then
     models = require("orm.sql_orm.tools.fields")
 else
-    -- Handle unsupported ORM type or other cases
-    error("Unsupported ORM type: " .. type)
+
+    return err.sqlError("Unsupported ORM type: " .. orm_t.orm)
 end
 
 return models

@@ -122,6 +122,7 @@ function Query(own_table, data)
                     insert = insert .. colname
 
                     counter = counter + 1
+
                 end
             end
 
@@ -129,8 +130,9 @@ function Query(own_table, data)
 
             -- TODO: return valid ID
             _connect = db:insert(insert)
-
             self._data.id = {new = _connect}
+            return true
+
         end,
 
         -- Update data in database
@@ -161,7 +163,10 @@ function Query(own_table, data)
             if set ~= "" then
                 update = update .. " SET " .. set .. "\n\t    WHERE `" .. ID .. "` = " .. self.id
                 db:execute(update)
+
+
             end
+
         end,
 
         ------------------------------------------------
@@ -171,9 +176,13 @@ function Query(own_table, data)
         -- save row
         save = function (self)
             if self.id then
-                self:_update()
+                if self:_add() then
+                    return true
+                end
             else
-                self:_add()
+                if self:_add() then
+                    return true
+                end
             end
         end,
 
@@ -188,6 +197,8 @@ function Query(own_table, data)
                 db:execute(delete)
             end
             self._data = {}
+            print( "cddddd")
+
         end
     }
 

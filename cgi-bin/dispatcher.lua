@@ -60,9 +60,9 @@ function handle_request(env)
     else
         if mess then
             err.requestError(mess)
-            print("hr")
+
         else
-            print("nz")
+   
             err.requestError(validation_message)
         end
     end

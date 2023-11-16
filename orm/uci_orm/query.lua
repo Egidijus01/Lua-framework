@@ -45,7 +45,7 @@ function Query(own_config, data)
         end,
 
 
-        _addNew = function (self)
+        _add = function (self)
            
             local section = x:add(self.own_config.__configname__, 'interface')
           
@@ -61,11 +61,14 @@ function Query(own_config, data)
                 x:set(self.own_config.__configname__, section, name, value)
             end
             x:save (self.own_config.__configname__)
-            x:commit(self.own_config.__configname__)
+            if x:commit(self.own_config.__configname__) then
+                return true
+            else
+                return false
+            end
 
         end,
-
-        
+ 
         _update = function (self)
 
                 x:foreach(self.own_config.__configname__, "interface", function(s)
@@ -80,7 +83,12 @@ function Query(own_config, data)
                         x:set(self.own_config.__configname__, id, key, value.new)
                     end
                 x:save (self.own_config.__configname__)
-                x:commit(self.own_config.__configname__)
+                if x:commit(self.own_config.__configname__) then
+                    return true
+                else
+                    return false
+                end
+
                 end
                 end)
 
@@ -92,18 +100,26 @@ function Query(own_config, data)
         save = function (self)
             
             if self._data.id then
-                
-                self:_update()
+                if self:_update() then
+                    return true
+                else
+                    return false                    
+                end
             else
-                self:_addNew()
+                if self:_add() then
+                    return true
+                else
+                    return false              
+                end
             end
         end,
+
         with_name = function (self,name)
             x:set(self.own_config.__configname__,name, "interface")
 
 
            for option, value in pairs(self._data) do
-            print(option, value.new)
+
                 if type(value.new) == "table" then
                     
                     local ListJSON = cjson.encode(value.new)
@@ -130,14 +146,39 @@ function Query(own_config, data)
                     if self._data[field] == nil then
                         return false, field.." Field is required"
                     end
-                else
+                elseif string.find(valid, "length") then
                     local fieldValue = self._data[field].new
                     local length = valid:match("length:(%d+)")
                     if length and fieldValue and string.len(fieldValue) > tonumber(length) then
                         return false, field.." Field exceeds the required length"
                     end
+
+                elseif valid == "email" then
+                    local pattern = "^[%w%.]+@[%w%.]+%.[%a]+$"
+                    local fieldValue = self._data[field].new
+                    if not fieldValue:match(pattern) then
+                        return false, field.." Isn't valid email address"
+                    end
+
+                elseif valid == "numbers" then
+                    local fieldValue = self._data[field].new
+                    
+                    if type(fieldValue) == "string" then
+                        if not fieldValue:match("[^%d]+") then
+                            return false, field.." Field Contains letters"
+                        end
+                    elseif type(fieldValue) == "number" then
+                        return true
+                    end
+                    
+                elseif valid == "letters" then
+                    local fieldValue = self._data[field].new
+                    if not fieldValue:match("[^%a]+") then
+                        return false, field.." Field Contains numbers"
+                    end
                 end
                
+
             end
             return true
         end,

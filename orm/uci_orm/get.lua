@@ -2,6 +2,7 @@ local uci = require("uci")
 local Query = require("orm.uci_orm.query")
 local x = uci.cursor()
 local function return_match(data, rules)
+    local res = {}
     for _, table in ipairs(data) do
         local match = true
         for key, value in pairs(rules) do
@@ -39,8 +40,7 @@ local Select = function(own_config)
         },
 
         where = function (self, args)
-
-            
+      
             for col, value in pairs(args) do
                 self._rules.where[col] = value
             end
@@ -65,9 +65,9 @@ local Select = function(own_config)
 
         first = function (self)
             
-            local data = self:all()
+            local data = self:all_obj()
 
-            local table = return_match(data, self._rules.where)
+            -- local table = return_match(data, self._rules.where)
             
             if table then
                 return table
@@ -75,8 +75,31 @@ local Select = function(own_config)
 
         end,
 
-        -- Return list of values
         all = function (self)
+
+            local colnames = {}
+
+            for _, x in pairs(self.own_config.__optnames) do
+                table.insert(colnames, x.name)
+            end
+          
+
+            local res = {}
+            local data = self:all_obj()
+
+            for _,tab in pairs(data) do
+                local entry = {}
+                for _, colname in pairs(colnames) do
+                    entry[colname] = tab[colname]
+                end
+
+                table.insert(res, entry)
+            end
+
+            return res
+        end,
+        -- Return list of values
+        all_obj = function (self)
             local res = {}
             local data = x:get_all(self.own_config.__configname__)
 
@@ -93,7 +116,9 @@ local Select = function(own_config)
                 i = i + 1
             end
  
-
+            if self._rules.where then
+                
+            end
             return res
         end,
 

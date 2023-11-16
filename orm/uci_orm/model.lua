@@ -24,8 +24,7 @@ local function create_config_file(name)
     local file = io.open(file_path, "a")
 
     if not file then
-        -- Handle the case where the file couldn't be created or opened
-        print("Error: Could not create or open the file")
+
         return
     end
 
@@ -153,9 +152,9 @@ function Config.new(self, args)
         -- @return {table} get column instance if column exist
         -----------------------------------------
         get_column = function (self, colname)
-            -- print(self.__optnames[1][1])
+
             for _, table_column in pairs(self.__optnames[2]) do
-                print(table_column)
+             
             end
             -- for _, table_column in pairs(self.__optnames) do
             --     if table_column.name == colname then

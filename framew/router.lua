@@ -72,7 +72,7 @@ function Router:route()
 
     end
 
-    print(#_stack)
+
     if #_stack > 0 then
         local tabl = _stack[1]
         return tabl[1](tabl[2])
