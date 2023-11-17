@@ -11,4 +11,6 @@ settings.DB = {
     name = "database.db",
     type = "sqlite3",
 }
+settings.assets_dir = "/www/httpd/assets/"
+
 return settings

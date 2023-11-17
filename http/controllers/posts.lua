@@ -26,15 +26,15 @@ function Sample.getSomg(request, response)
 
 -- print("We get " .. users:count() .. " users")
 
-    local users = User.get:all()
+    -- local users = User.get:all()
 
-    local data = {}
-    for i,x in pairs(users) do
-        table.insert(data, {x.username, x.password, x.age, x.job})
-    end 
-    print(request:query_table())
+    -- local data = {}
+    -- for i,x in pairs(users) do
+    --     table.insert(data, {x.username, x.password, x.age, x.job})
+    -- end 
+    -- print(request:query_table())
 
-    return response:with_json(users):response()
+    return response:with_message("Ok"):response()
 
 
 end

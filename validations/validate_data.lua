@@ -3,7 +3,9 @@ local sample = {}
 local cjson = require("cjson")
 local parse = require("validations.parse")
 local headers = require("validations.headers.required_headers")
-
+local settings = require("http.config")
+local Multipart = require("multipart")
+local path = settings.assets_dir
 
 
 local validation_rules = {
@@ -48,8 +50,18 @@ function sample.validate_request(env, data)
     elseif string.match(content_type, "multipart/form%-data") then
         -- response = parse.parse_form_data(data)
         local status, content = pcall(parse.parse_form_data, data)
+
+        local Multipart = require("multipart")
+        local multipart_data = Multipart(data, content_type)
+        -- local parameter = multipart_data:get("kazkas")
+        local files = multipart_data:get_as_array("files")
+        print(files)
+        for i,x in pairs(files) do
+            print(i,x)
+        end
         if status then
             response = content
+            
         else
             return false, "Invalid multipart/form data"
         end
