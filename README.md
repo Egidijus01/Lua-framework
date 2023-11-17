@@ -83,7 +83,6 @@ return endpoint
 ### You are able to upload images
 ![Alt text](image.png)
 
-
 ## Usage for Sql
  - in http directory file config.lua change 'DB' settings
 
