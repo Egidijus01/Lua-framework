@@ -31,7 +31,6 @@ function sample.validate_request(env, data)
 
     -- Check content type
     local content_type = env.headers["content-type"]
-    print(content_type)
     if not content_type then
         return false, "No Content-type header"
     end
@@ -52,40 +51,38 @@ function sample.validate_request(env, data)
         -- response = parse.parse_form_data(data)
         local status, content = pcall(parse.parse_form_data, data)
 
-        -- local Multipart = require("multipart")
-        -- local multipart_data = Multipart(data, content_type)
+        local Multipart = require("multipart")
+        local multipart_data = Multipart(data, content_type)
 
-        -- local temp = {}
-        -- for _ ,table  in pairs(multipart_data._data.data) do
-        --     print(type(table.value))
-        --     if #table.value <= 100 then
-        --         temp[table.name] = table.value
-        --     else
-        --         local pattern = 'filename="([^"]+)"'
-        --         local c = (string.match(table.headers[1], pattern))
-        --         local path_exists = os.execute("mkdir -p " .. path)
+        local temp = {}
+        for _ ,table  in pairs(multipart_data._data.data) do
+           
+            if #table.value <= 20 then
+                temp[table.name] = table.value
+            else
+                local pattern = 'filename="([^"]+)"'
+                local c = (string.match(table.headers[1], pattern))
+                local path_exists = os.execute("mkdir -p " .. path)
                 
-        --         local file_path = path .. c
-        --         local file_handle, err = io.open(file_path, "wb")
+                local file_path = path .. c
+                local file_handle, err = io.open(file_path, "wb")
                 
-        --         if file_handle then
-        --             -- Write the file content to the file
-        --             file_handle:write(table.value)
+                if file_handle then
+                    -- Write the file content to the file
+                    file_handle:write(table.value)
 
-        --             -- Close the file handle
-        --             file_handle:close()
+                    -- Close the file handle
+                    file_handle:close()
     
-        --         else
-        --             return false, "Error opening file for writing:", file_path, err
-        --         end
-        --     end
+                else
+                    return false, "Error opening file for writing:", file_path, err
+                end
+            end
 
             
-        -- end
-        print("cia")
+        end
         if status then
-            print("passid")
-            response = content
+            response = temp
             
         else
             return false, "Invalid multipart/form data"
