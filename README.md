@@ -24,6 +24,7 @@ I created a framework during my internship that integrates essential OpenWRT ser
 
 ## General usage
  - in http directory file config.lua change 'settings' section 'orm' to sql or uci
+ - in http directory file config.lua change 'assets_dir' section to you wanted directory if it isn't present it will be created
  - In http directory create file where you will store Models
 
 ### Required imports 
@@ -79,6 +80,9 @@ function endpoint:handle_request()
 end
 return endpoint
 ```
+### You are able to upload images
+![Alt text](image.png)
+
 
 ## Usage for Sql
  - in http directory file config.lua change 'DB' settings

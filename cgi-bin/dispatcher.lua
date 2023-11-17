@@ -47,6 +47,8 @@ function handle_request(env)
     local is_valid, validation_message, content = validate.validate_request(env, request_body)
 
     local d, mess = valid_method.validateRequestMethod(env.REQUEST_METHOD)
+    print("is_valid",is_valid)
+    print("d",d)
 
     if is_valid and d then
 
